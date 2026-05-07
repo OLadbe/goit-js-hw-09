@@ -1,43 +1,40 @@
 const STORAGE_KEY = 'feedback-form-state';
-const formData = {
-    email: "",
-    message: ""
-    
-}
+
+let formData = {
+  email: "",
+  message: ""
+};
 
 const feedbackForm = document.querySelector(".feedback-form");
 
-feedbackForm.addEventListener("input", e => {
-    formData.email = feedbackForm.elements.email.value.trim();
-    formData.message = feedbackForm.elements.message.value.trim();
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+const savedData = localStorage.getItem(STORAGE_KEY);
+if (savedData) {
+  try {
+    const parsedData = JSON.parse(savedData);
+    formData = { ...formData, ...parsedData };
+    feedbackForm.elements.email.value = formData.email || "";
+    feedbackForm.elements.message.value = formData.message || "";
+  } catch (error) {
+    console.error("Помилка парсингу", error);
+  }
+}
 
-})
+feedbackForm.addEventListener("input", () => {
+  formData.email = feedbackForm.elements.email.value.trim();
+  formData.message = feedbackForm.elements.message.value.trim();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+});
 
 feedbackForm.addEventListener("submit", e => {
-    if (formData.email === "" || formData.message === "") {
-        return alert("Fill please all fields");
-    }
-    console.log(formData);
+  e.preventDefault();
 
-    localStorage.removeItem(STORAGE_KEY);
-    formData = { email: "", message: "" };
-    feedbackForm.reset();
-})
-    
-document.addEventListener("DOMContentLoaded", () => {
-    const data = loadFormLS(STORAGE_KEY);
-    if (!data) return;
+  if (formData.email === "" || formData.message === "") {
+    return alert("Fill please all fields");
+  }
 
-    feedbackForm.elements.email.value = data.email;
-    feedbackForm.elements.message.value = data.message;
-})
+  console.log(formData);
 
-function loadFormLS(key) {
-    const jsonData = localStorage.getItem(key);
-    try {
-        return JSON.parse(jsonData);
-    } catch (error) {
-        return null;
-    }
-}
+  localStorage.removeItem(STORAGE_KEY);
+  formData = { email: "", message: "" };
+  feedbackForm.reset();
+});
